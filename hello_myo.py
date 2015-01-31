@@ -18,28 +18,19 @@ class Listener(myo.DeviceListener):
     is_debug = False
 
     def left_click(self):
-        current_position = win32api.GetCursorPos()
-        
-        #win32api.SetCursorPos(current_position)
-         
-        win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, current_position[0], current_position[1], current_position[0], current_position[1])
-        win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, current_position[0], current_position[1], current_position[0], current_position[1])
+        win32api.SetCursorPos((0,0))
+        win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN,0,0,0,0)
+        win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP,0,0,0,0)
 
     def right_click(self):
-        current_position = win32api.GetCursorPos()
-        
-        #win32api.SetCursorPos(current_position)
-         
-        win32api.mouse_event(win32con.MOUSEEVENTF_RIGHTDOWN, current_position[0], current_position[1], current_position[0], current_position[1])
-        win32api.mouse_event(win32con.MOUSEEVENTF_RIGHTUP, current_position[0], current_position[1], current_position[0], current_position[1])
+        win32api.SetCursorPos((0,0))
+        win32api.mouse_event(win32con.MOUSEEVENTF_RIGHTDOWN,0,0,0,0)
+        win32api.mouse_event(win32con.MOUSEEVENTF_RIGHTUP,0,0,0,0)
 
     def middle_click(self):
-        current_position = win32api.GetCursorPos()
-        
-        #win32api.SetCursorPos(current_position)
-         
-        win32api.mouse_event(win32con.MOUSEEVENTF_MIDDLEDOWN, current_position[0], current_position[1], current_position[0], current_position[1])
-        win32api.mouse_event(win32con.MOUSEEVENTF_MIDDLEUP, current_position[0], current_position[1], current_position[0], current_position[1])
+        win32api.SetCursorPos((0,0))
+        win32api.mouse_event(win32con.MOUSEEVENTF_MIDDLEDOWN,0,0,0,0)
+        win32api.mouse_event(win32con.MOUSEEVENTF_MIDDLEUP,0,0,0,0)
         print("fuck buitches, get money")
 
     def on_connect(self, myo, timestamp):
