@@ -13,6 +13,7 @@ This parameter controls the percent of times that data is shown.
 """
 
 class Listener(myo.DeviceListener):
+    orientation_yee = [0,0,0,0]
 
     def __init__(self):
         self.e_pressed = False
@@ -65,9 +66,10 @@ class Listener(myo.DeviceListener):
         print_('on_disconnect')
 
 
-    def on_pose(self, myo, timestamp, pose, orientation):
+    def on_pose(self, myo, timestamp, pose):
         print_('on_pose', pose)
-        arm_boundary = 0.3
+        arm_boundary = 0.45
+        global orientation_yee
 
         if pose == pose_t.double_tap:
             print_("Enabling EMG")
@@ -76,11 +78,11 @@ class Listener(myo.DeviceListener):
         elif pose == pose_t.fist:
             print_("I AMM IRRROONNN MAAAAAAAAANNN")
 
-        elif (pose == pose_t.fingers_spread) and (orientation[0] < arm_boundary):
+        elif(pose == pose_t.fingers_spread) and (orientation_yee[0] < arm_boundary):
             print_("Left Click")
             self.left_click(0,0)
 
-        elif (pose == pose_t.fingers_spread) and (orientation[0] > arm_boundary):
+        elif(pose == pose_t.fingers_spread) and (orientation_yee[0] > arm_boundary):
             print_("Right Click")
             self.right_click(0,0)
 
@@ -91,8 +93,10 @@ class Listener(myo.DeviceListener):
             self.release_e()
 
 
-    def on_orientation_data(self, myo, timestamp, orientation):
-        show_output('orientation', orientation)
+    #def on_orientation_data(self, myo, timestamp, orientation):
+    #    global orientation_yee
+    #    orientation_yee = orientation
+    #    show_output('orientation', orientation)
     '''
     def on_accelerometor_data(self, myo, timestamp, acceleration):
         show_output('acceleration', acceleration)
