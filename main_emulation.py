@@ -6,45 +6,19 @@ import random
 import win32api, win32con
 
 myo.init()
-
 SHOW_OUTPUT_CHANCE = 0.01
 
-class Stack(list):
-
-    def __init__(self, M):
-        self.maxSize = M
-        self._data = []
-
-
-    def add(self, element):
-
-        if len(self._data) < self.maxSize:
-            self._data.append(element)
-
-        else:
-            self._data = [self._data[x - 1] for x in range(len(self._data))]
-            self._data[-1] = element
-
-
-    def midpoint(self):
-        if len(self._data) > 0:
-            cache = self._data[::]
-            cache.sort()
-            return cache[len(cache) // 2]
-
-        else:
-            raise Exception("Stack must be populated to get midpoint.")
-
-
 class Listener(myo.DeviceListener):
-
-    orientation_yee = [0,0,0,0]
 
     global is_debug
     is_debug = True
 
     global middle
     middle = False
+
+    global euler_orientation
+
+    global arm_boundary = 250
 
     def left_click(self):
         win32api.SetCursorPos((0,0))
@@ -94,9 +68,6 @@ class Listener(myo.DeviceListener):
 
     def on_pose(self, myo, timestamp, pose):
         if is_debug: print_('on_pose', pose)
-
-        arm_boundary = -0.1
-        global orientation_yee
         global middle
 
         if pose == pose_t.double_tap:
@@ -107,13 +78,13 @@ class Listener(myo.DeviceListener):
             if is_debug: print_("fist")
             self.middle_click()
 
-        elif(pose == pose_t.fingers_spread) and (orientation_yee[0] < arm_boundary):
+        elif(pose == pose_t.fingers_spread) and (euler_orientation[0] <= arm_boundary):
             if middle == True:
                 self.middle_click()
             print_("Left Click")
             self.left_click()
 
-        elif(pose == pose_t.fingers_spread) and (orientation_yee[0] > arm_boundary):
+        elif(pose == pose_t.fingers_spread) and (euler_orientation[0] > arm_boundary):
             if middle == True:
                 self.middle_click()
             print_("Right Click")
@@ -129,9 +100,18 @@ class Listener(myo.DeviceListener):
         #orientation_yee = orientation
         #show_output('orientation', orientation)
 
+        #Unpacking the quaternian representation to individual floats
         w,x,y,z = orientation
-        Roll = ( 2*w*x*y*z / ( 1- 2*(x^2 + y^2)))
-        print("ROLL VALUE: {}".format(str(Roll)))
+        roll = (2*w*x*y*z / (1- 2*(x^2 + y^2)))
+        pitch = math.asin(max(-1, min(1, 2*(w*y - x*z))))
+        yaw = math.atan(2*(w*z + x*y) / (1 - 2(y**2 + z**2))
+
+
+        Roll = abs(round(roll, 0)) * 1000
+        Pitch = abs(round(pitch, 0) * 1000
+        Yaw = abs(round(yaw, 0)) * 1000
+        euler_orientation = (Roll, Pitch, Yaw)
+        print("Roll: {}, Pitch: {}, Yaw: {}".format(Roll, Pitch, Yaw))
 
     def on_accelerometor_data(self, myo, timestamp, acceleration):
         if is_debug: show_output('acceleration', acceleration)
