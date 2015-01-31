@@ -23,6 +23,11 @@ class Listener(myo.DeviceListener):
         win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN,x,y,0,0)
         win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP,x,y,0,0)
 
+    def left_click(self, x,y):
+        win32api.SetCursorPos((x,y))
+        win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN,x,y,0,0)
+        win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP,x,y,0,0)
+
     def on_wave_in(self):
         self.e_pressed = True
         win32api.keybd_event(0x45, 0x12)
@@ -60,8 +65,9 @@ class Listener(myo.DeviceListener):
         print_('on_disconnect')
 
 
-    def on_pose(self, myo, timestamp, pose):
+    def on_pose(self, myo, timestamp, pose, orientation):
         print_('on_pose', pose)
+        arm_boundary = 0.3
 
         if pose == pose_t.double_tap:
             print_("Enabling EMG")
@@ -70,9 +76,13 @@ class Listener(myo.DeviceListener):
         elif pose == pose_t.fist:
             print_("I AMM IRRROONNN MAAAAAAAAANNN")
 
-        elif pose == pose_t.fingers_spread:
-            print_("CLICKKKK")
+        elif (pose == pose_t.fingers_spread) and (orientation[0] < arm_boundary):
+            print_("Left Click")
             self.left_click(0,0)
+
+        elif (pose == pose_t.fingers_spread) and (orientation[0] > arm_boundary):
+            print_("Right Click")
+            self.right_click(0,0)
 
         elif pose == pose_t.wave_in:
             self.on_wave_in()
@@ -80,10 +90,10 @@ class Listener(myo.DeviceListener):
         elif pose == pose_t.rest:
             self.release_e()
 
-    '''   
+
     def on_orientation_data(self, myo, timestamp, orientation):
         show_output('orientation', orientation)
-
+    '''
     def on_accelerometor_data(self, myo, timestamp, acceleration):
         show_output('acceleration', acceleration)
 
@@ -128,4 +138,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
