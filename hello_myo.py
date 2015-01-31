@@ -15,7 +15,9 @@ This parameter controls the percent of times that data is shown.
 class Listener(myo.DeviceListener):
     orientation_yee = [0,0,0,0]
     global is_debug
-    is_debug = False
+    is_debug = True
+    global middle
+    middle = False
 
     def left_click(self):
         win32api.SetCursorPos((0,0))
@@ -31,7 +33,7 @@ class Listener(myo.DeviceListener):
         win32api.SetCursorPos((0,0))
         win32api.mouse_event(win32con.MOUSEEVENTF_MIDDLEDOWN,0,0,0,0)
         win32api.mouse_event(win32con.MOUSEEVENTF_MIDDLEUP,0,0,0,0)
-        print("fuck buitches, get money")
+        if is_debug: print("Middle Key Pressed")
 
     def on_connect(self, myo, timestamp):
         if is_debug: print_("Connected to Myo")
@@ -64,8 +66,9 @@ class Listener(myo.DeviceListener):
     def on_pose(self, myo, timestamp, pose):
         if is_debug: print_('on_pose', pose)
         
-        arm_boundary = 0.45
+        arm_boundary = -0.1
         global orientation_yee
+        global middle
 
         if pose == pose_t.double_tap:
             if is_debug: print_("double_tap")
@@ -76,15 +79,20 @@ class Listener(myo.DeviceListener):
             self.middle_click()
 
         elif(pose == pose_t.fingers_spread) and (orientation_yee[0] < arm_boundary):
+            if middle == True:
+                self.middle_click()
             print_("Left Click")
             self.left_click()
 
         elif(pose == pose_t.fingers_spread) and (orientation_yee[0] > arm_boundary):
+            if middle == True:
+                self.middle_click()
             print_("Right Click")
             self.right_click()
 
         elif pose == pose_t.wave_in:
-            self.middle_click()
+            if middle == True:
+                self.middle_click()
         '''
         else:
             self.middle_click()
