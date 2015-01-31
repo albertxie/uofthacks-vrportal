@@ -18,7 +18,8 @@ class Listener(myo.DeviceListener):
 
     global euler_orientation
 
-    global arm_boundary = 250
+    global arm_boundary
+    arm_boundary = 30
 
     def left_click(self):
         win32api.SetCursorPos((0,0))
@@ -69,7 +70,8 @@ class Listener(myo.DeviceListener):
     def on_pose(self, myo, timestamp, pose):
         if is_debug: print_('on_pose', pose)
         global middle
-
+        global euler_orientation
+        
         if pose == pose_t.double_tap:
             if is_debug: print_("double_tap")
             #myo.set_stream_emg(stream_emg.enabled)
@@ -100,17 +102,20 @@ class Listener(myo.DeviceListener):
         #orientation_yee = orientation
         #show_output('orientation', orientation)
 
+        global euler_orientation
+
         #Unpacking the quaternian representation to individual floats
-        w,x,y,z = orientation
-        roll = (2*w*x*y*z / (1- 2*(x^2 + y^2)))
+        x,y,z,w = orientation
+        roll = math.atan((2*w*x*y*z / (1- 2*(x**2 + y**2))))
         pitch = math.asin(max(-1, min(1, 2*(w*y - x*z))))
-        yaw = math.atan(2*(w*z + x*y) / (1 - 2(y**2 + z**2))
+        yaw = math.atan(2*(w*z + x*y) / (1 - 2*(y**2 + z**2)))
 
 
-        Roll = abs(round(roll, 0)) * 1000
-        Pitch = abs(round(pitch, 0) * 1000
-        Yaw = abs(round(yaw, 0)) * 1000
-        euler_orientation = (Roll, Pitch, Yaw)
+        Roll = abs(round(roll * 1000, 0))
+        Pitch = abs(round(pitch * 1000, 0))
+        Yaw = abs(round(yaw * 1000, 0))
+        
+        euler_orientation = [Roll, Pitch, Yaw]
         print("Roll: {}, Pitch: {}, Yaw: {}".format(Roll, Pitch, Yaw))
 
     def on_accelerometor_data(self, myo, timestamp, acceleration):
