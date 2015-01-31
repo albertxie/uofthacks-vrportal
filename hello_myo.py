@@ -12,17 +12,47 @@ There can be a lot of output from certain data like acceleration and orientation
 This parameter controls the percent of times that data is shown.
 """
 
+
+class roll_data(list):
+
+    def __init__(self, max_size):
+        self._data = []
+        self._max = max_size
+
+    def add(self, element):
+        if len(self._data) >= self.max:
+            self._data.append(element)
+        else:
+            self._data = [self._data[x - 1] for x in range(len(self._data))]
+            self._data[-1] = element
+
+    def midpoint(self):
+        cache = self._data[::]
+        cache.sort()
+        return cache[len(cache) // 2]
+
+    def midpoint2(self):
+        ''' if the first one is crap'''
+
+        cache = self._data[::]
+        m, M = min(cache), max(cache)
+        return sum(m, M) / 2
+
+
 class Listener(myo.DeviceListener):
+
+    global orientation_yee
     orientation_yee = [0,0,0,0]
+
     global is_debug
     is_debug = True
-    global middle
 
-
+    global rd
     global arm_boundary
 
-
-    global arm_boundary
+    def __intit__(self):
+        self.setup = True
+        rd = roll_data(100)
 
     def left_click(self):
         win32api.SetCursorPos((0,0))
@@ -69,14 +99,15 @@ class Listener(myo.DeviceListener):
 
 
     def get_arm_boundary(self):
-        pass
+        if len(rd) != 0:
+            arm_boundary = rd.midpoint()
+        else:
+            arm_boundary = 0.5
 
 
     def on_pose(self, myo, timestamp, pose):
         if is_debug: print_('on_pose', pose)
 
-
-        global orientation_yee
 
         if pose == pose_t.double_tap:
             if is_debug: print_("double_tap")
@@ -104,8 +135,8 @@ class Listener(myo.DeviceListener):
 
 
     def on_orientation_data(self, myo, timestamp, orientation):
-        global orientation_yee
         orientation_yee = orientation
+        rd.add(orientation[0])
         #show_output('orientation', orientation)
 
     def on_accelerometor_data(self, myo, timestamp, acceleration):
