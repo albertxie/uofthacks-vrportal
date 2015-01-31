@@ -1,3 +1,4 @@
+import math
 import myo
 from myo.lowlevel import pose_t, stream_emg
 from myo.six import print_
@@ -124,9 +125,13 @@ class Listener(myo.DeviceListener):
 
 
     def on_orientation_data(self, myo, timestamp, orientation):
-        global orientation_yee
-        orientation_yee = orientation
-        show_output('orientation', orientation)
+        #global orientation_yee
+        #orientation_yee = orientation
+        #show_output('orientation', orientation)
+
+        w,x,y,z = orientation
+        Roll = ( 2*w*x*y*z / ( 1- 2*(x^2 + y^2)))
+        print("ROLL VALUE: {}".format(str(Roll)))
 
     def on_accelerometor_data(self, myo, timestamp, acceleration):
         if is_debug: show_output('acceleration', acceleration)
