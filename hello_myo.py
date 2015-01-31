@@ -17,7 +17,12 @@ class Listener(myo.DeviceListener):
     global is_debug
     is_debug = True
     global middle
-    middle = False
+
+
+    global arm_boundary
+
+
+    global arm_boundary
 
     def left_click(self):
         win32api.SetCursorPos((0,0))
@@ -63,12 +68,15 @@ class Listener(myo.DeviceListener):
         if is_debug: print_('on_disconnect')
 
 
+    def get_arm_boundary(self):
+        pass
+
+
     def on_pose(self, myo, timestamp, pose):
         if is_debug: print_('on_pose', pose)
-        
-        arm_boundary = -0.1
+
+
         global orientation_yee
-        global middle
 
         if pose == pose_t.double_tap:
             if is_debug: print_("double_tap")
@@ -93,18 +101,12 @@ class Listener(myo.DeviceListener):
         elif pose == pose_t.wave_in:
             if middle == True:
                 self.middle_click()
-        '''
-        else:
-            self.middle_click()
-        
-        elif pose == pose_t.rest:
-            self.release_e()
-        '''
+
 
     def on_orientation_data(self, myo, timestamp, orientation):
         global orientation_yee
         orientation_yee = orientation
-        show_output('orientation', orientation)
+        #show_output('orientation', orientation)
 
     def on_accelerometor_data(self, myo, timestamp, acceleration):
         if is_debug: show_output('acceleration', acceleration)
@@ -117,7 +119,7 @@ class Listener(myo.DeviceListener):
 
     def on_lock(self, myo, timestamp):
         if is_debug: print_('locked')
-        
+
     def on_sync(self, myo, timestamp, arm, x_direction):
         if is_debug: print_('synced', arm, x_direction)
 
