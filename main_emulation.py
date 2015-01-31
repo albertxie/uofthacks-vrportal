@@ -7,15 +7,41 @@ import win32api, win32con
 myo.init()
 
 SHOW_OUTPUT_CHANCE = 0.01
-"""
-There can be a lot of output from certain data like acceleration and orientation.
-This parameter controls the percent of times that data is shown.
-"""
+
+class Stack(list):
+
+    def __init__(self, M):
+        self.maxSize = M
+        self._data = []
+
+
+    def add(self, element):
+
+        if len(self._data) < self.maxSize:
+            self._data.append(element)
+
+        else:
+            self._data = [self._data[x - 1] for x in range(len(self._data))]
+            self._data[-1] = element
+
+
+    def midpoint(self):
+        if len(self._data) > 0:
+            cache = self._data[::]
+            cache.sort()
+            return cache[len(cache) // 2]
+
+        else:
+            raise Exception("Stack must be populated to get midpoint.")
+
 
 class Listener(myo.DeviceListener):
+
     orientation_yee = [0,0,0,0]
+
     global is_debug
     is_debug = True
+
     global middle
     middle = False
 
@@ -23,17 +49,19 @@ class Listener(myo.DeviceListener):
         win32api.SetCursorPos((0,0))
         win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN,0,0,0,0)
         win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP,0,0,0,0)
+        if is_debug: print("Left Mouse Key Event")
 
     def right_click(self):
         win32api.SetCursorPos((0,0))
         win32api.mouse_event(win32con.MOUSEEVENTF_RIGHTDOWN,0,0,0,0)
         win32api.mouse_event(win32con.MOUSEEVENTF_RIGHTUP,0,0,0,0)
+        if is_debug: print("Right Mouse Key Event")
 
     def middle_click(self):
         win32api.SetCursorPos((0,0))
         win32api.mouse_event(win32con.MOUSEEVENTF_MIDDLEDOWN,0,0,0,0)
         win32api.mouse_event(win32con.MOUSEEVENTF_MIDDLEUP,0,0,0,0)
-        if is_debug: print("Middle Key Pressed")
+        if is_debug: print("Middle Mouse Key Event")
 
     def on_connect(self, myo, timestamp):
         if is_debug: print_("Connected to Myo")
@@ -65,7 +93,7 @@ class Listener(myo.DeviceListener):
 
     def on_pose(self, myo, timestamp, pose):
         if is_debug: print_('on_pose', pose)
-        
+
         arm_boundary = -0.1
         global orientation_yee
         global middle
@@ -93,13 +121,7 @@ class Listener(myo.DeviceListener):
         elif pose == pose_t.wave_in:
             if middle == True:
                 self.middle_click()
-        '''
-        else:
-            self.middle_click()
-        
-        elif pose == pose_t.rest:
-            self.release_e()
-        '''
+
 
     def on_orientation_data(self, myo, timestamp, orientation):
         global orientation_yee
@@ -117,7 +139,7 @@ class Listener(myo.DeviceListener):
 
     def on_lock(self, myo, timestamp):
         if is_debug: print_('locked')
-        
+
     def on_sync(self, myo, timestamp, arm, x_direction):
         if is_debug: print_('synced', arm, x_direction)
 
