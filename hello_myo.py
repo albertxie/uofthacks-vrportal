@@ -14,24 +14,27 @@ This parameter controls the percent of times that data is shown.
 
 class Listener(myo.DeviceListener):
     orientation_yee = [0,0,0,0]
+    global is_debug
     is_debug = False
 
     def __init__(self):
         self.e_pressed = False
 
     def left_click(self):
-        win32api.SetCursorPos((x,y))
-
         current_position = GetCursorPos()
-        win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, x, y, current_position[0], current_position[0])
-        win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, x, y, current_position[0], current_position[0])
+        
+        #win32api.SetCursorPos(current_position)
+         
+        win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, current_position[0], current_position[1], current_position[0], current_position[1])
+        win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, current_position[0], current_position[1], current_position[0], current_position[1])
 
-    def Right_click(self):
-        win32api.SetCursorPos((x,y))
-
+    def right_click(self):
         current_position = GetCursorPos()
-        win32api.mouse_event(win32con.MOUSEEVENTF_RIGHTDOWN, x, y, current_position[0], current_position[0])
-        win32api.mouse_event(win32con.MOUSEEVENTF_RIGHTTUP, x, y, current_position[0], current_position[0])
+        
+        #win32api.SetCursorPos(current_position)
+         
+        win32api.mouse_event(win32con.MOUSEEVENTF_RIGHTDOWN, current_position[0], current_position[1], current_position[0], current_position[1])
+        win32api.mouse_event(win32con.MOUSEEVENTF_RIGHT5UP, current_position[0], current_position[1], current_position[0], current_position[1])
 
 
     def on_wave_in(self):
@@ -105,12 +108,13 @@ class Listener(myo.DeviceListener):
         elif pose == pose_t.wave_in:
             self.on_wave_in()
 
+        else:
+            self.release_e()
         '''
         elif pose == pose_t.rest:
             self.release_e()
         '''
-        else:
-            self.release_e()
+
 
     def on_orientation_data(self, myo, timestamp, orientation):
         global orientation_yee
