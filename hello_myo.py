@@ -7,7 +7,7 @@ import win32api, win32con
 myo.init()
 
 SHOW_OUTPUT_CHANCE = 0.01
-r"""
+"""
 There can be a lot of output from certain data like acceleration and orientation.
 This parameter controls the percent of times that data is shown.
 """
@@ -17,11 +17,8 @@ class Listener(myo.DeviceListener):
     global is_debug
     is_debug = False
 
-    def __init__(self):
-        self.e_pressed = False
-
     def left_click(self):
-        current_position = GetCursorPos()
+        current_position = win32api.GetCursorPos()
         
         #win32api.SetCursorPos(current_position)
          
@@ -29,32 +26,21 @@ class Listener(myo.DeviceListener):
         win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, current_position[0], current_position[1], current_position[0], current_position[1])
 
     def right_click(self):
-        current_position = GetCursorPos()
+        current_position = win32api.GetCursorPos()
         
         #win32api.SetCursorPos(current_position)
          
         win32api.mouse_event(win32con.MOUSEEVENTF_RIGHTDOWN, current_position[0], current_position[1], current_position[0], current_position[1])
-        win32api.mouse_event(win32con.MOUSEEVENTF_RIGHT5UP, current_position[0], current_position[1], current_position[0], current_position[1])
+        win32api.mouse_event(win32con.MOUSEEVENTF_RIGHTUP, current_position[0], current_position[1], current_position[0], current_position[1])
 
-
-    def on_wave_in(self):
-        self.e_pressed = True
-
-        #Set 2&3 Hardwarescan code, as documented on http://en.wikipedia.org/wiki/Scancode
-        #Alternative ScanCode: 0x1E
-        #Release Code: 0x9E
-        win32api.keybd_event(0x45, 0x1C)
-
-
-    def release_e(self):
-        ''' releases the E key iff it is no t already depressed '''
-        if self.e_pressed:
-            self.e_pressed = False
-
-        #Set 2&3 Hardwarescan code, as documented on http://en.wikipedia.org/wiki/Scancode
-        #Alternative ScanCode: 0x1E
-        #Release Code: 0x9E
-        win32api.keybd_event(0x45, 0x1C)
+    def middle_click(self):
+        current_position = win32api.GetCursorPos()
+        
+        #win32api.SetCursorPos(current_position)
+         
+        win32api.mouse_event(win32con.MOUSEEVENTF_MIDDLEDOWN, current_position[0], current_position[1], current_position[0], current_position[1])
+        win32api.mouse_event(win32con.MOUSEEVENTF_MIDDLEUP, current_position[0], current_position[1], current_position[0], current_position[1])
+        print("fuck buitches, get money")
 
     def on_connect(self, myo, timestamp):
         if is_debug: print_("Connected to Myo")
@@ -86,7 +72,7 @@ class Listener(myo.DeviceListener):
 
     def on_pose(self, myo, timestamp, pose):
         if is_debug: print_('on_pose', pose)
-
+        
         arm_boundary = 0.45
         global orientation_yee
 
@@ -96,6 +82,7 @@ class Listener(myo.DeviceListener):
 
         elif pose == pose_t.fist:
             if is_debug: print_("fist")
+            self.middle_click()
 
         elif(pose == pose_t.fingers_spread) and (orientation_yee[0] < arm_boundary):
             print_("Left Click")
@@ -106,15 +93,14 @@ class Listener(myo.DeviceListener):
             self.right_click()
 
         elif pose == pose_t.wave_in:
-            self.on_wave_in()
-
-        else:
-            self.release_e()
+            self.middle_click()
         '''
+        else:
+            self.middle_click()
+        
         elif pose == pose_t.rest:
             self.release_e()
         '''
-
 
     def on_orientation_data(self, myo, timestamp, orientation):
         global orientation_yee
@@ -132,7 +118,7 @@ class Listener(myo.DeviceListener):
 
     def on_lock(self, myo, timestamp):
         if is_debug: print_('locked')
-
+        
     def on_sync(self, myo, timestamp, arm, x_direction):
         if is_debug: print_('synced', arm, x_direction)
 
