@@ -1,6 +1,3 @@
-# Copyright (C) 2014  Niklas Rosenstein
-# All rights reserved.
-
 import myo
 from myo.lowlevel import pose_t, stream_emg
 from myo.six import print_
@@ -16,11 +13,24 @@ This parameter controls the percent of times that data is shown.
 """
 
 class Listener(myo.DeviceListener):
-    # return False from any method to stop the Hub
+
+    def __init__(self):
+        self.e_pressed = False
+
+
     def left_click(self, x,y):
         win32api.SetCursorPos((x,y))
         win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN,x,y,0,0)
         win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP,x,y,0,0)
+
+    def on_wave_in(self):
+        self.e_pressed = True
+        win32api.keybd_event(0x45, 0x12)
+
+    def release_e(self):
+        if self.e_pressed:
+            self.e_pressed = False
+            win32api.keybd_event(0x45, 0x1C) 
 
     def on_connect(self, myo, timestamp):
         print_("Connected to Myo")
@@ -37,6 +47,7 @@ class Listener(myo.DeviceListener):
         r""" Called after the respective event callbacks have been
         invoked. This method is *always* triggered, even if one of
         the callbacks requested the stop of the Hub. """
+
     '''
     def on_pair(self, myo, timestamp):
         print_('Paired')
@@ -47,17 +58,28 @@ class Listener(myo.DeviceListener):
 
     def on_disconnect(self, myo, timestamp):
         print_('on_disconnect')
-        
+
+
     def on_pose(self, myo, timestamp, pose):
         print_('on_pose', pose)
+
         if pose == pose_t.double_tap:
             print_("Enabling EMG")
             #myo.set_stream_emg(stream_emg.enabled)
+
         elif pose == pose_t.fist:
             print_("I AMM IRRROONNN MAAAAAAAAANNN")
+
         elif pose == pose_t.fingers_spread:
             print_("CLICKKKK")
             self.left_click(0,0)
+
+        elif pose == pose_t.wave_in:
+            self.on_wave_in()
+
+        elif pose == pose_t.rest:
+            self.release_e()
+
     '''   
     def on_orientation_data(self, myo, timestamp, orientation):
         show_output('orientation', orientation)
@@ -68,6 +90,7 @@ class Listener(myo.DeviceListener):
     def on_gyroscope_data(self, myo, timestamp, gyroscope):
         show_output('gyroscope', gyroscope)
     '''
+
     def on_unlock(self, myo, timestamp):
         print_('unlocked')
 
@@ -79,13 +102,15 @@ class Listener(myo.DeviceListener):
 
     def on_unsync(self, myo, timestamp):
         print_('unsynced')
-        
+
     def on_emg(self, myo, timestamp, emg):
         show_output('emg', emg)
+
 
 def show_output(message, data):
     if random.random() < SHOW_OUTPUT_CHANCE: 
         print_(message + ':' + str(data))
+
 
 def main():
     hub = myo.Hub()
