@@ -6,7 +6,6 @@ import random
 import win32api, win32con
 
 myo.init()
-SHOW_OUTPUT_CHANCE = 0.01
 
 class Listener(myo.DeviceListener):
 
@@ -18,31 +17,47 @@ class Listener(myo.DeviceListener):
 
     global euler_orientation
 
+    #Threshold in which the Myo is considered to be "upside down"
     global arm_boundary
     arm_boundary = 30
 
     def left_click(self):
-        win32api.SetCursorPos((0,0))
-        win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN,0,0,0,0)
-        win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP,0,0,0,0)
+        ''' (Listener) -> NoneType
+        Emulates a left mouse click in Windows at position (0, 0)
+        '''
+        win32api.SetCursorPos((0, 0))
+        win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0)
+        win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, 0, 0, 0, 0)
+
         if is_debug:
             print("Left Mouse Key Event")
 
     def right_click(self):
-        win32api.SetCursorPos((0,0))
-        win32api.mouse_event(win32con.MOUSEEVENTF_RIGHTDOWN,0,0,0,0)
-        win32api.mouse_event(win32con.MOUSEEVENTF_RIGHTUP,0,0,0,0)
+        ''' (Listener) -> NoneType
+        Emulates a right mouse click in Windows at position (0, 0)
+        '''
+        win32api.SetCursorPos((0, 0))
+        win32api.mouse_event(win32con.MOUSEEVENTF_RIGHTDOWN, 0, 0, 0, 0)
+        win32api.mouse_event(win32con.MOUSEEVENTF_RIGHTUP, 0, 0, 0, 0)
+
         if is_debug:
             print("Right Mouse Key Event")
 
     def middle_click(self):
-        win32api.SetCursorPos((0,0))
-        win32api.mouse_event(win32con.MOUSEEVENTF_MIDDLEDOWN,0,0,0,0)
-        win32api.mouse_event(win32con.MOUSEEVENTF_MIDDLEUP,0,0,0,0)
+        ''' (Listener) -> NoneType
+        Emulates a middle (wheel) mouse click in Windows at position (0, 0)
+        '''
+        win32api.SetCursorPos((0, s0))
+        win32api.mouse_event(win32con.MOUSEEVENTF_MIDDLEDOWN, 0, 0, 0, 0)
+        win32api.mouse_event(win32con.MOUSEEVENTF_MIDDLEUP, 0, 0, 0, 0)
+
         if is_debug:
             print("Middle Mouse Key Event")
 
     def on_connect(self, myo, timestamp):
+        ''' (Listener, Myo, str) -> NoneType
+        Vibrates the Myo band once a connection has been established
+        '''
         if is_debug:
             print_("Connected to Myo")
 
@@ -50,6 +65,9 @@ class Listener(myo.DeviceListener):
         myo.request_rssi()
 
     def on_rssi(self, myo, timestamp, rssi):
+        ''' (Listener, Myo, str, rssi) -> NoneType
+        Displays RSSI state
+        '''
         if is_debug:
             print_("RSSI:", rssi)
 
@@ -62,17 +80,28 @@ class Listener(myo.DeviceListener):
         the callbacks requested the stop of the Hub. """
 
     def on_pair(self, myo, timestamp):
+        ''' (Listener, Myo, str) -> NoneType
+        Displays info when a connection has been established
+        '''
 
         if is_debug:
             print_('Paired')
             print_("If you don't see any responses to your movements, try re-running the program or making sure the Myo works with Myo Connect (from Thalmic Labs).")
 
     def on_disconnect(self, myo, timestamp):
+        ''' (Listener, Myo, str) -> NoneType
+        Displays info when a connection is terminated
+        '''
+
         if is_debug:
             print_('on_disconnect')
 
 
     def on_pose(self, myo, timestamp, pose):
+        ''' (Listener, Myo, str) -> NoneType
+        Triggers specific events when specific Myo positions are detected
+        '''
+
         if is_debug:
             print_('on_pose', pose)
 
@@ -88,6 +117,7 @@ class Listener(myo.DeviceListener):
 
             self.middle_click()
 
+        #When finger_spread is detected with palm facing down
         elif(pose == pose_t.fingers_spread) and (euler_orientation[0] <= arm_boundary):
 
             if middle == True:
@@ -98,6 +128,7 @@ class Listener(myo.DeviceListener):
 
             self.left_click()
 
+        #When finger_spread is detected with palm facing up
         elif(pose == pose_t.fingers_spread) and (euler_orientation[0] > arm_boundary):
             if middle == True:
                 self.middle_click()
@@ -107,33 +138,36 @@ class Listener(myo.DeviceListener):
 
             self.right_click()
 
-        elif pose == pose_t.wave_in:
-            if middle == True:
-                self.middle_click()
-
 
     def on_orientation_data(self, myo, timestamp, orientation):
+        ''' (Listener, Myo, str, Quaternian) -> NoneType
+        Translate current quaternian floats in to Euler numbers in radians
+        '''
 
         global euler_orientation
 
         #Unpacking the quaternian representation to individual floats
         w, x, y, z = orientation
+        x, y, z, w = orientation
 
 
         #Translating quaternian data to euler numbers
-        roll = math.atan((2*w*x*y*z) / (1- 2*(x**2 + y**2))) * (180 / math.pi)
+        roll = math.atan((2*(w*x + y*z) / (1 - 2*(x**2 + y**2))) * (180/math.pi)
         pitch = math.asin(max(-1, min(1, 2*(w*y - x*z)))) * (180 / math.pi)
         yaw = math.atan(2*(w*z + x*y) / (1 - 2*(y**2 + z**2))) * (180 / math.pi)
 
 
-        #Translating to radians
-        Roll = abs(round(roll * 1000, 0))
-        Pitch = abs(round(pitch * 1000, 0))
-        Yaw = abs(round(yaw * 1000, 0))
+        #Translating to radians and scaled accordingly
+        scale = 100
+        Roll = ((roll + math.pi) / (math.pi * 2)) * scale 
+        Pitch = ((pitch + math.pi/2) / (math.pi)) * scale
+        Yaw = ((yaw + math.pi) / (math.pi * 2))  * scale
 
         euler_orientation = [Roll, Pitch, Yaw]
         print("Roll: {}, Pitch: {}, Yaw: {}".format(Roll, Pitch, Yaw))
 
+
+    #More debugging methods, print data on specific Myo triggers 
 
     def on_accelerometor_data(self, myo, timestamp, acceleration):
         if is_debug:
@@ -164,8 +198,7 @@ class Listener(myo.DeviceListener):
 
 
 def show_output(message, data):
-    if random.random() < SHOW_OUTPUT_CHANCE: 
-        print_(message + ':' + str(data))
+    print_(message + ':' + str(data))
 
 
 def main():
