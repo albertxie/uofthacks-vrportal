@@ -105,16 +105,17 @@ class Listener(myo.DeviceListener):
         global euler_orientation
 
         #Unpacking the quaternian representation to individual floats
-        x,y,z,w = orientation
-        roll = math.atan((2*w*x*y*z) / (1- 2*(x**2 + y**2)))
-        pitch = math.asin(max(-1, min(1, 2*(w*y - x*z))))
-        yaw = math.atan(2*(w*z + x*y) / (1 - 2*(y**2 + z**2)))
+        w, x, y, z = orientation
+        roll = math.atan((2*w*x*y*z) / (1- 2*(x**2 + y**2))) * (180 / math.pi)
+        pitch = math.asin(max(-1, min(1, 2*(w*y - x*z)))) * (180 / math.pi)
+        yaw = math.atan(2*(w*z + x*y) / (1 - 2*(y**2 + z**2))) * (180 / math.pi)
 
 
         Roll = abs(round(roll * 1000, 0))
         Pitch = abs(round(pitch * 1000, 0))
         Yaw = abs(round(yaw * 1000, 0))
-        
+
+
         euler_orientation = [Roll, Pitch, Yaw]
         print("Roll: {}, Pitch: {}, Yaw: {}".format(Roll, Pitch, Yaw))
 
