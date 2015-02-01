@@ -10,7 +10,7 @@ myo.init()
 class Listener(myo.DeviceListener):
 
     global is_debug
-    is_debug = True
+    is_debug = False
 
     global middle
     middle = False
@@ -19,7 +19,7 @@ class Listener(myo.DeviceListener):
 
     #Threshold in which the Myo is considered to be "upside down"
     global arm_boundary
-    arm_boundary = 30
+    arm_boundary = 500
 
     def left_click(self):
         ''' (Listener) -> NoneType
@@ -47,7 +47,7 @@ class Listener(myo.DeviceListener):
         ''' (Listener) -> NoneType
         Emulates a middle (wheel) mouse click in Windows at position (0, 0)
         '''
-        win32api.SetCursorPos((0, s0))
+        win32api.SetCursorPos((0, 0))
         win32api.mouse_event(win32con.MOUSEEVENTF_MIDDLEDOWN, 0, 0, 0, 0)
         win32api.mouse_event(win32con.MOUSEEVENTF_MIDDLEUP, 0, 0, 0, 0)
 
@@ -147,12 +147,12 @@ class Listener(myo.DeviceListener):
         global euler_orientation
 
         #Unpacking the quaternian representation to individual floats
-        w, x, y, z = orientation
+        #w, x, y, z = orientation
         x, y, z, w = orientation
 
 
         #Translating quaternian data to euler numbers
-        roll = math.atan((2*(w*x + y*z) / (1 - 2*(x**2 + y**2))) * (180/math.pi)
+        roll = math.atan(2*(w*x + y*z) / (1 - 2*(x**2 + y**2))) * (180/math.pi)
         pitch = math.asin(max(-1, min(1, 2*(w*y - x*z)))) * (180 / math.pi)
         yaw = math.atan(2*(w*z + x*y) / (1 - 2*(y**2 + z**2))) * (180 / math.pi)
 
@@ -162,6 +162,12 @@ class Listener(myo.DeviceListener):
         Roll = ((roll + math.pi) / (math.pi * 2)) * scale 
         Pitch = ((pitch + math.pi/2) / (math.pi)) * scale
         Yaw = ((yaw + math.pi) / (math.pi * 2))  * scale
+
+
+        #Taking the absulote value of each value
+        Roll = abs(round(Roll, 0))
+        Pitch = abs(round(Pitch, 0))
+        Yaw = abs(round(Yaw, 0))
 
         euler_orientation = [Roll, Pitch, Yaw]
         print("Roll: {}, Pitch: {}, Yaw: {}".format(Roll, Pitch, Yaw))
