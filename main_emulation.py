@@ -25,28 +25,33 @@ class Listener(myo.DeviceListener):
         win32api.SetCursorPos((0,0))
         win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN,0,0,0,0)
         win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP,0,0,0,0)
-        if is_debug: print("Left Mouse Key Event")
+        if is_debug:
+            print("Left Mouse Key Event")
 
     def right_click(self):
         win32api.SetCursorPos((0,0))
         win32api.mouse_event(win32con.MOUSEEVENTF_RIGHTDOWN,0,0,0,0)
         win32api.mouse_event(win32con.MOUSEEVENTF_RIGHTUP,0,0,0,0)
-        if is_debug: print("Right Mouse Key Event")
+        if is_debug:
+            print("Right Mouse Key Event")
 
     def middle_click(self):
         win32api.SetCursorPos((0,0))
         win32api.mouse_event(win32con.MOUSEEVENTF_MIDDLEDOWN,0,0,0,0)
         win32api.mouse_event(win32con.MOUSEEVENTF_MIDDLEUP,0,0,0,0)
-        if is_debug: print("Middle Mouse Key Event")
+        if is_debug:
+            print("Middle Mouse Key Event")
 
     def on_connect(self, myo, timestamp):
-        if is_debug: print_("Connected to Myo")
+        if is_debug:
+            print_("Connected to Myo")
 
         myo.vibrate('short')
         myo.request_rssi()
 
     def on_rssi(self, myo, timestamp, rssi):
-        if is_debug: print_("RSSI:", rssi)
+        if is_debug:
+            print_("RSSI:", rssi)
 
     def on_event(self, event):
         r""" Called before any of the event callbacks. """
@@ -57,39 +62,49 @@ class Listener(myo.DeviceListener):
         the callbacks requested the stop of the Hub. """
 
     def on_pair(self, myo, timestamp):
+
         if is_debug:
             print_('Paired')
             print_("If you don't see any responses to your movements, try re-running the program or making sure the Myo works with Myo Connect (from Thalmic Labs).")
-            #print_("Double tap enables EMG.")
-            #print_("Spreading fingers disables EMG.\n")
 
     def on_disconnect(self, myo, timestamp):
-        if is_debug: print_('on_disconnect')
+        if is_debug:
+            print_('on_disconnect')
 
 
     def on_pose(self, myo, timestamp, pose):
-        if is_debug: print_('on_pose', pose)
+        if is_debug:
+            print_('on_pose', pose)
+
         global middle
         global euler_orientation
 
-        if pose == pose_t.double_tap:
-            if is_debug: print_("double_tap")
-            #myo.set_stream_emg(stream_emg.enabled)
+        if pose == pose_t.double_tap and is_debug:
+            print_("double_tap")
 
         elif pose == pose_t.fist:
-            if is_debug: print_("fist")
+            if is_debug:
+                print_("fist")
+
             self.middle_click()
 
         elif(pose == pose_t.fingers_spread) and (euler_orientation[0] <= arm_boundary):
+
             if middle == True:
                 self.middle_click()
-            print_("Left Click")
+
+            if is_debug:
+                print_("Left Click")
+
             self.left_click()
 
         elif(pose == pose_t.fingers_spread) and (euler_orientation[0] > arm_boundary):
             if middle == True:
                 self.middle_click()
-            print_("Right Click")
+
+            if is_debug:
+                print_("Right Click")
+
             self.right_click()
 
         elif pose == pose_t.wave_in:
@@ -98,47 +113,54 @@ class Listener(myo.DeviceListener):
 
 
     def on_orientation_data(self, myo, timestamp, orientation):
-        #global orientation_yee
-        #orientation_yee = orientation
-        #show_output('orientation', orientation)
 
         global euler_orientation
 
         #Unpacking the quaternian representation to individual floats
         w, x, y, z = orientation
+
+
+        #Translating quaternian data to euler numbers
         roll = math.atan((2*w*x*y*z) / (1- 2*(x**2 + y**2))) * (180 / math.pi)
         pitch = math.asin(max(-1, min(1, 2*(w*y - x*z)))) * (180 / math.pi)
         yaw = math.atan(2*(w*z + x*y) / (1 - 2*(y**2 + z**2))) * (180 / math.pi)
 
 
+        #Translating to radians
         Roll = abs(round(roll * 1000, 0))
         Pitch = abs(round(pitch * 1000, 0))
         Yaw = abs(round(yaw * 1000, 0))
 
-
         euler_orientation = [Roll, Pitch, Yaw]
         print("Roll: {}, Pitch: {}, Yaw: {}".format(Roll, Pitch, Yaw))
 
+
     def on_accelerometor_data(self, myo, timestamp, acceleration):
-        if is_debug: show_output('acceleration', acceleration)
+        if is_debug:
+            show_output('acceleration', acceleration)
 
     def on_gyroscope_data(self, myo, timestamp, gyroscope):
-        if is_debug: show_output('gyroscope', gyroscope)
+        if is_debug:
+            show_output('gyroscope', gyroscope)
 
     def on_unlock(self, myo, timestamp):
-        if is_debug: print_('unlocked')
+        if is_debug:
+            print_('unlocked')
 
     def on_lock(self, myo, timestamp):
-        if is_debug: print_('locked')
+        if is_debug:
+            print_('locked')
 
     def on_sync(self, myo, timestamp, arm, x_direction):
-        if is_debug: print_('synced', arm, x_direction)
+        if is_debug:
+            print_('synced', arm, x_direction)
 
     def on_unsync(self, myo, timestamp):
         print_('unsynced')
 
     def on_emg(self, myo, timestamp, emg):
-        if is_debug: show_output('emg', emg)
+        if is_debug:
+            show_output('emg', emg)
 
 
 def show_output(message, data):
