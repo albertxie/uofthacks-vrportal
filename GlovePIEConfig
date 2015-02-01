@@ -1,0 +1,2 @@
+Keys.W = MapRange(Wiimote1.Pitch, -85 degrees, -60 degrees, 0, 1.6)
+Keys.Space = MapRange(Wiimote1.RawAccZ, -20 m per s per s, 20 m per s per s, 0, 1)
