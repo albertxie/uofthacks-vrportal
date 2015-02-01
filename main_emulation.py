@@ -71,7 +71,7 @@ class Listener(myo.DeviceListener):
         if is_debug: print_('on_pose', pose)
         global middle
         global euler_orientation
-        
+
         if pose == pose_t.double_tap:
             if is_debug: print_("double_tap")
             #myo.set_stream_emg(stream_emg.enabled)
@@ -106,7 +106,7 @@ class Listener(myo.DeviceListener):
 
         #Unpacking the quaternian representation to individual floats
         x,y,z,w = orientation
-        roll = math.atan((2*w*x*y*z / (1- 2*(x**2 + y**2))))
+        roll = math.atan((2*w*x*y*z) / (1- 2*(x**2 + y**2)))
         pitch = math.asin(max(-1, min(1, 2*(w*y - x*z))))
         yaw = math.atan(2*(w*z + x*y) / (1 - 2*(y**2 + z**2)))
 
